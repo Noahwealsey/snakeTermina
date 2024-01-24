@@ -19,12 +19,12 @@ int n_choices = sizeof(choices) / sizeof(char *);
 
 void print_menu(WINDOW *menu_win, int selected){
     int x = 2, y = 2;
-    boc(menu_win, y, x);
+    box(menu_win, '-', '|');
     for(int i= 0; i < n_choices; i++){
         if(selected == i + 1){
-            wattron(menu_win, A_BLINK);
+            wattron(menu_win, A_REVERSE);
             mvwprintw(menu_win, y, x, "%s", choices[i]);
-            wattroff(menu_win, A_BLINK);
+            wattroff(menu_win, A_REVERSE);
 
         }
         else{
@@ -32,11 +32,14 @@ void print_menu(WINDOW *menu_win, int selected){
             
         }
         ++y;
-    }    
+    }
+    wrefresh(menu_win);    
 }
 
 int main(){
     WINDOW *menu_win;
+
+    int exitCode;
 
     int i,j;
     int selected = 1;
@@ -49,16 +52,16 @@ int main(){
     cbreak();
 
     getmaxyx(stdscr, i ,j);
+    mvprintw(28, 0, "max no. of rows and cols %d\t %d", i, j);
+    startx = (80 - WIDTH) / 2;
+    starty = (24 - HEIGHT) / 2;
 
-    startx = i/2;
-    starty = j/2;
-
-    menu_win = new_win(HEIGHT, WIDTH, starty, startx);
+    menu_win = newwin(HEIGHT, WIDTH, starty, startx);
     keypad(menu_win, selected);   
     mvprintw(0, 0, "GO UP AND DOWN WITH DIEWCTION KEYS, PRESS ENTER TO SELECT");
     refresh();
 
-
+    print_menu(menu_win, selected);
     while(1)
     {
         c = wgetch(menu_win);
@@ -84,7 +87,7 @@ int main(){
                 choice = selected;
                 break;
             default:
-                mvprintw(24, 0, "the character pressed is = %3d Hopefully it can be printed as %c is ", c, c);
+                mvprintw(40, 0, "the character pressed is = %3d Hopefully it can be printed as %c is ", c, c);
                 refresh();
                 break;
                 
@@ -95,9 +98,16 @@ int main(){
         }
 
     }
-    mvprintw(24, 1, "You chose %d which is %s", choice, choices[choice - 1]);
     clrtoeol();
+    mvprintw(30, 0, "You chose %d which is %s", choice, choices[choice - 1]);
     refresh();
+    
+    attron(A_BLINK);
+    mvprintw(40, 90, "PRESS ANYTHING TO EXIT");
+    attroff(A_BLINK);
+    exitCode = getch();
+
+
     endwin();
     return 0;
 
