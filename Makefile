@@ -5,3 +5,5 @@ s: snake.c
 
 t: test1.c
 	$(CC) $(CFLAGS) -o t test1.c -lncurses
+
+
