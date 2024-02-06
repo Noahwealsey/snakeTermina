@@ -3,14 +3,16 @@
 #include <time.h>
 #include <unistd.h>
 
-typedef struct 
-{
+#define COLS 200
+#define LINES 200
+
+typedef struct {
     int x;
     int y;
 } vector2d;
 
 int hash() {
-    return rand() % 5;
+    return rand() % 20;
 }
 
 vector2d output(vector2d input) {
@@ -26,8 +28,7 @@ int main() {
     cbreak();
     noecho();
     curs_set(0);  // Hide the cursor
-  
-    int ch;
+
     int score = 0;
 
     vector2d food = {2, 4};
@@ -58,22 +59,20 @@ int main() {
                 break;
         }
 
+        // Update tail positions
+        for (int i = len - 1; i > 0; i--) {
+            tail[i] = tail[i - 1];
+        }
+        tail[0] = pos;  // Assign the current position to the first element of the tail array
+
         pos.x += dir.x;
         pos.y += dir.y;
 
         erase();
 
-        // Draw the tail if the snake has a length greater than 1
-        if (len > 1) {
-            // Draw the tail of the snake (optional)
-            for (int i = 0; i < len; i++)
-            {
-                int tailX = pos.x - dir.x;
-                int tailY = pos.y - dir.y;
-                mvaddch(tailY, tailX, '*');    
-            }
-            
-            
+        // Draw tail
+        for (int i = 0; i < len; i++) {
+            mvaddch(tail[i].y, tail[i].x, '*');
         }
 
         mvaddch(pos.y, pos.x, '*');
@@ -83,7 +82,11 @@ int main() {
             score++;
             food = output(food);
             len++;  // Increase the length of the snake
-            curs_set(0);  // Hide the cursor each time food appears
+
+            // Ensure food spawns within the visible screen area
+            if (food.x <= 0 || food.y <= 0 || food.x >= COLS - 1 || food.y >= LINES - 1) {
+                food = output(food);
+            }
         }
 
         mvprintw(0, 0, "Score: %d", score);
